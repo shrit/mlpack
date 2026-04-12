@@ -6712,6 +6712,10 @@ DRWAV_PRIVATE void drwav__pcm_to_s16(drwav_int16* pOut, const drwav_uint8* pIn, 
             shift  += 8;
         }
 
+        if (!drwav__is_little_endian()) {
+            sample = drwav__bswap64(sample);
+        }
+
         pIn += j;
         *pOut++ = (drwav_int16)((drwav_int64)sample >> 48);
     }
@@ -7151,6 +7155,10 @@ DRWAV_PRIVATE void drwav__pcm_to_f32(float* pOut, const drwav_uint8* pIn, size_t
             DRWAV_ASSERT(j < 8);
             sample |= (drwav_uint64)(pIn[j]) << shift;
             shift  += 8;
+        }
+
+        if (!drwav__is_little_endian()) {
+            sample = drwav__bswap64(sample);
         }
 
         pIn += j;
@@ -7635,6 +7643,10 @@ DRWAV_PRIVATE void drwav__pcm_to_s32(drwav_int32* pOut, const drwav_uint8* pIn, 
             DRWAV_ASSERT(j < 8);
             sample |= (drwav_uint64)(pIn[j]) << shift;
             shift  += 8;
+        }
+
+        if (!drwav__is_little_endian()) {
+            sample = drwav__bswap64(sample);
         }
 
         pIn += j;
