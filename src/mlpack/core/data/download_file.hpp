@@ -119,6 +119,30 @@ inline bool DownloadFile(const std::string& url,
 inline bool DownloadFileWithCache(const std::string& url,
                                  std::string& filename);
 
+#ifdef MLPACK_USE_ZLIB
+
+/*
+ * Check if a file contains gzip-compressed data by inspecting the first two
+ * bytes for the gzip magic number (0x1F 0x8B).
+ *
+ * @param filePath Path to the file to check.
+ * @return true if the file starts with the gzip magic bytes.
+ */
+inline bool IsGzipFile(const std::string& filePath);
+
+/*
+ * Decompress a gzip file and write the result to a new file.
+ * Uses httplib's gzip_decompressor internally.
+ *
+ * @param srcPath Path to the gzip-compressed file.
+ * @param destPath Path where the decompressed file will be written.
+ * @return true on success, throws on failure.
+ */
+inline bool DecompressGzipFile(const std::string& srcPath,
+                               const std::string& destPath);
+
+#endif // MLPACK_USE_ZLIB
+
 #endif
 
 } // namespace mlpack
