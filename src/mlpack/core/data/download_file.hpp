@@ -14,6 +14,7 @@
 
 // In case if it is not included
 #include "../httplib/httplib.hpp"
+#include "decompress_gz.hpp"
 
 namespace mlpack {
 
@@ -122,15 +123,6 @@ inline bool DownloadFileWithCache(const std::string& url,
 #ifdef MLPACK_USE_ZLIB
 
 /*
- * Check if a file contains gzip-compressed data by inspecting the first two
- * bytes for the gzip magic number (0x1F 0x8B).
- *
- * @param filePath Path to the file to check.
- * @return true if the file starts with the gzip magic bytes.
- */
-inline bool IsGzipFile(const std::string& filePath);
-
-/*
  * Decompress a gzip file and write the result to a new file.
  * Uses httplib's gzip_decompressor internally.
  *
@@ -138,10 +130,23 @@ inline bool IsGzipFile(const std::string& filePath);
  * @param destPath Path where the decompressed file will be written.
  * @return true on success, throws on failure.
  */
-inline bool DecompressGzipFile(const std::string& srcPath,
+inline bool DecompressDownloadedFile(const std::string& srcPath,
                                const std::string& destPath);
 
 #endif // MLPACK_USE_ZLIB
+
+/**
+ * If the file at `filePath` has a .gz extension and contains gzip data,
+ * decompress it to `destPath` and return `destPath`.  If the decompressed file
+ * already exists, return it without re-doing work.  For non-.gz files the input
+ * path is returned unchanged.  Throws if MLPACK_USE_ZLIB is not enabled.
+ *
+ * @param filePath Path to the (possibly compressed) file.
+ * @param destPath Where to write the decompressed output.
+ * @return The path to the usable (decompressed or original) file.
+ */
+inline std::string DecompressDownloadedIfNeeded(const std::string& filePath,
+                                      const std::string& destPath);
 
 #endif
 
