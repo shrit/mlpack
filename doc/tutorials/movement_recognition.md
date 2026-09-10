@@ -114,7 +114,7 @@ RAM, we cross-compile on a host `x86_64` machine and copy the static
 binaries on the target machine, exactly as we did in the [Raspberry Pi tutorial](../embedded/crosscompile_armv7.md).
 The board uses a RISC-V C906 core, so we need a `riscv64-lp64d`
 [Bootlin](https://toolchains.bootlin.com/) toolchain.  Our target in this tutorial to produce
-a small static binary, therefore, we use the musl variant
+a small static binary; therefore, we use the musl variant:
 
 ```sh
 wget https://toolchains.bootlin.com/downloads/releases/toolchains/riscv64-lp64d/tarballs/riscv64-lp64d--musl--stable-2025.08-1.tar.xz
