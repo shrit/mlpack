@@ -180,12 +180,11 @@ file train
 
 ### Copying everything to the device
 
-The Duo's BusyBox userland has no SFTP server, so a plain `scp` fails with
-`sh: /usr/libexec/sftp-server: not found`.  Use scp's legacy protocol with
-`-O`.  Over the Duo's USB-OTG connection the board is usually reachable at
-`192.168.42.1`, you can check that by doing a local ping. The default password
+We can use `scp` to copy the programs to the Milk-V, but, we have to use the 
+`-O` option for the legacy SCP protocol since the Milk-V does not support SFTP.
+If you have plugged in your Milk-V via USB, the board should be reachable at 
+`192.168.42.1`; you can check that by doing a local ping.  The default password
 for the Duo is `milkv`:
-
 ```sh
 scp -O imu_test collect train infer  root@192.168.42.1:/root/
 ssh root@192.168.42.1 'chmod +x /root/imu_test /root/collect /root/train /root/infer'
