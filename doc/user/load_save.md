@@ -757,8 +757,9 @@ When a remote URL is given to `Load()`:
 
  * If zlib is available (see
    [`MLPACK_USE_ZLIB`](compile.md#configuring-mlpack-with-compile-time-definitions)),
-   gzip-compressed files (`.csv.gz`, `.arff.gz`, `.tar.gz`, etc.) are
-   automatically decompressed after download.
+   gzip-compressed files (`.csv.gz`, `.arff.gz`, etc.) are automatically
+   decompressed after download.  Local `.gz` files can also be loaded directly
+   with `Load()` (see [Loading local gzip-compressed files](#loading-local-gzip-compressed-files)).
 
 Instead of passing a URL directly to `Load()`, it is also possible to download a
 remote dataset manually to a specific local path with the
@@ -823,8 +824,8 @@ for (size_t i = 0; i < opts.Headers().size(); ++i)
 ### Downloading gzip-compressed datasets
 
 When [`MLPACK_USE_ZLIB`](compile.md#configuring-mlpack-with-compile-time-definitions)
-is enabled, `DownloadFile()` automatically decompresses `.gz` and `.tar.gz` files
-after downloading.
+is enabled, `DownloadFile()` automatically decompresses `.gz` files after
+downloading.
 
 ```c++
 // To use gzip decompression, enable MLPACK_USE_ZLIB and link with -lz,
@@ -835,6 +836,24 @@ mlpack::DownloadFile("https://datasets.mlpack.org/avocado.csv.gz",
 // The file is automatically decompressed to "avocado.csv".
 arma::mat data;
 mlpack::Load("avocado.csv", data);
+```
+
+### Loading local gzip-compressed files
+
+When [`MLPACK_USE_ZLIB`](compile.md#configuring-mlpack-with-compile-time-definitions)
+is enabled, `Load()` can directly load local `.gz` files.  If the file has a
+`.gz` extension and contains valid gzip data, it is decompressed to a
+temporary file before loading.  The inner extension determines the file
+format (e.g. `data.csv.gz` is loaded as CSV, `data.arff.gz` as ARFF).
+
+```c++
+// Load a local gzip-compressed CSV file directly.
+// Requires MLPACK_USE_ZLIB to be enabled (pass -DENABLE_ZLIB=ON to CMake).
+arma::mat data;
+mlpack::Load("my_dataset.csv.gz", data, mlpack::Fatal);
+
+std::cout << "Loaded " << data.n_cols << " points with "
+    << data.n_rows << " dimensions." << std::endl;
 ```
 
 ## Mixed categorical data
