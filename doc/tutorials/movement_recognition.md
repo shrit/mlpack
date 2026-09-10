@@ -146,7 +146,7 @@ All four programs build from one CMake project.  `imu_test` and `collect`
 only need the Linux I2C headers, while `train` and `infer` link mlpack; CMake
 reuses the repository's embedded cross-compile infrastructure (`CMake/`) to fetch
 mlpack and its dependencies and cross-compile OpenBLAS, as described in the
-[embedded example tutorial](../embedded/crosscompile_example.md).  At this stage, we need to
+[embedded example tutorial](../embedded/crosscompile_example.md).  When running CMake, we need to
 define the architecture of the target device with the `ARCH_NAME=RV64GCV`
 variable (the ISA of the board's C906 core):
 
