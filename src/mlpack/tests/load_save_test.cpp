@@ -3450,7 +3450,6 @@ TEST_CASE("LoadCSVSemicolonMissingToNanHeaderInOptions", "[LoadSaveTest][tiny]")
 }
 
 #ifndef MLPACK_DISABLE_HTTPLIB
-#ifdef MLPACK_ENABLE_HTTPLIB
 
 TEST_CASE("URLTests", "[LoadSaveTest]")
 {
@@ -3673,7 +3672,6 @@ TEST_CASE("DownLoad404File", "[LoadSaveTest]")
 }
 
 #endif
-#endif
 
 #endif
 
@@ -3750,6 +3748,8 @@ TEST_CASE("SaveCSVWithHeaders", "[LoadSaveTest][tiny]")
 
   remove("test.csv");
 }
+
+#ifndef MLPACK_DISABLE_DR_LIBS
 
 //
 // The audio files below are published under the CC-0 license.

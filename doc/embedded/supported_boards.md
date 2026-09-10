@@ -72,8 +72,9 @@ architecture with a similar word size, or, adapt the parameters directly in
 the new architecture added to this table.
 
 Each section below gives the glibc toolchain by default.  Where Bootlin also
-ships a **musl** toolchain for that architecture, a second block is provided:
-musl produces a smaller footprint, which can matter on very constrained devices.
+ships a `musl` toolchain for that architecture, a second block is provided:
+`musl` toolchains generally produce smaller programs, which can matter on very
+constrained devices.
 
 ### ARM11
 
@@ -84,7 +85,7 @@ musl produces a smaller footprint, which can matter on very constrained devices.
 
 For a smaller footprint, Bootlin also provides a
 [musl libc toolchain](https://toolchains.bootlin.com/releases_armv6-eabihf.html);
-use these variables instead:
+if using that toolchain, use these variables instead:
 
 ```
 -DTOOLCHAIN_PREFIX=/path/to/bootlin/toolchain/armv6-eabihf--musl--stable-2025.08-1/bin/arm-buildroot-linux-musleabihf-

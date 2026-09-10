@@ -3,8 +3,9 @@
 In this tutorial we build a complete, end-to-end human-movement / activity
 recognition pipeline that runs entirely on a tiny RISC-V Linux board. The
 pipeline consists of data collection, training, and inference all happen on the target device.
-The main target of this tutorial is to provide an end to end example of using mlpack
-on real resource-constrained embedded hardware.
+The main target of this tutorial is to provide an end-to-end example of using mlpack
+on real resource-constrained embedded hardware.  The tutorial can be followed
+step-by-step.
 
 If you have not cross-compiled mlpack before, read these first:
 
@@ -30,18 +31,16 @@ Contents:
 
 ### What are we building
 
-We are building a machine learning based human movement recognition pipline to detect
+We are building a machine learning based human movement recognition pipeline to detect
 movements such as walking, sitting, squats, and climbing stairs. This
 is enabled by using a 9 Degree of Freedom inertial sensor that is read over an I2C bus.
 The collected data is cut into windows, and then fed into a Fast Fourier
 Transform (FFT) in order to extract the features from each collected windows.
-Finally, we build a small `float32` neural network, that learns to recognize the
-movements, with the highest possible accuracy. 
+Finally, we build a small `float32` neural network that learns to recognize the
+movements with the highest possible accuracy.
 
-The example is split into four small independent programs. Each one of them
-can be run by the user to do one specific task. It is up to the user to
-combine them or integrate such a functionality in their project. Our main
-target is to provide an example on how such a software can be built: 
+The example is split into four small independent programs, each of which
+performs a single task:
 
  * `imu_test`: sensor check + magnetometer calibration
  * `collect`: record sensor data to CSV (small, exception-free)
@@ -51,9 +50,11 @@ target is to provide an example on how such a software can be built:
 All four are built from one CMake project that uses the same cross-compilation
 infrastructure described in the [embedded example tutorial](../embedded/crosscompile_example.md).
 
-The pipeline is: `collect` writes one CSV file per recording (the file name
-is the label), `train` turns those CSVs into FFT features and fits a network,
-and `infer` reads the live sensor stream and prints the predicted movement.
+The pipeline is:
+
+ * `collect` writes one CSV file per recording (the file name is the label),
+ * `train` turns those CSVs into FFT features and fits a network, and
+ * `infer` reads the live sensor stream and prints the predicted movement.
 
 The figure below shows that feature pipeline on the real recorded data, from
 raw signal to the features the network learns from:
@@ -62,17 +63,22 @@ raw signal to the features the network learns from:
 <img src="../img/movement_fft_pipeline.png" width="720" alt="Movement-recognition FFT feature pipeline: raw recording, overlapping sliding windows, and per-movement FFT power spectra" />
 </center>
 
-We show in (a) a `raw recording` for the squat movement only using the accelerometer's three
-axes over a few seconds; the vertical axis (`az`) oscillates around 1 g with the movement's rhythm.
-(b) `sliding windows` cuts each recording into fixed-length windows that overlap by
-half a window (a sliding window with a 50% step): overlap generate more
-training windows, creating a higher exposure for each movement. Therefore
-increasing the accuracy. (c) `FFT power per movement`, in this figure we show
-how FFT is applied per-channel for each window on all the movements in order to
-extract the relevant power spectrum. As demonstrated, different movements can
-be identified with different frequencies. Note that, the gravity (DC) component
-is removed from this plot for clarity. However, is kept part of the features
-space used for training.
+In the figure, 
+
+ * `(a)` "raw recording" shows the accelerometer's three axes over a few seconds
+   for a squat movement; the vertical axis (`az`) oscillates around 1g with the
+   movement's rhythm.
+
+ * `(b)` "sliding windows" cuts each recording into fixed-length windows that
+   overlap by half a window (a sliding window with a 50% step): overlap
+   generates more training windows, creating a higher exposure for each
+   movement; this increases the accuracy.
+
+ * `(c)` "FFT power per movement" shows how the FFT is applied per-channel for
+   each window on all the movements in order to extract the relevant power
+   spectrum.  Different movements can be identified with different frequencies.
+   Note that, the gravity (DC) component is removed from this plot for clarity.
+   However, it is kept as part of the features used for training.
 
 ### Hardware
 
@@ -104,7 +110,7 @@ different interface.
 ### Setting up the cross-compilation toolchain
 
 Since the device is resource constrained with only 28 MB available
-RAM, therefore, we cross-compile on a host `x86_64` machine and copy the static
+RAM, we cross-compile on a host `x86_64` machine and copy the static
 binaries on the target machine, exactly as we did in the [Raspberry Pi tutorial](../embedded/crosscompile_armv7.md).
 The board uses a RISC-V C906 core, so we need a `riscv64-lp64d`
 [Bootlin](https://toolchains.bootlin.com/) toolchain.  Our target in this tutorial to produce
