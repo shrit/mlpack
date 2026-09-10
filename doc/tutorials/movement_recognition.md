@@ -222,7 +222,7 @@ built into `imu_test`; rotate the board through all orientations while it sample
 `<label>_<date>.csv`, so the label is the file name.  The arguments are
 positional -- `collect <label> [sensors] [out-dir] [device] [rate-hz]
 [duration-sec] [mag-cal]` -- so here we record accelerometer only, into `data`,
-on the default bus, at 100 Hz, for 30 seconds.  Run `collect` once per movement:
+on the default I2C bus, at 100 Hz, for 30 seconds.  Run `collect` once per movement:
 
 ```sh
 mkdir data
