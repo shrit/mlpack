@@ -33,9 +33,8 @@ inline bool IsGzipFile(const std::string& filePath);
  *
  * @param srcPath Path to the gzip-compressed file.
  * @param destPath Path where the decompressed file will be written.
- * @return true on success, throws on failure.
  */
-inline bool DecompressGzFile(const std::string& srcPath,
+inline void DecompressGzFile(const std::string& srcPath,
                              const std::string& destPath);
 
 #endif // MLPACK_USE_ZLIB

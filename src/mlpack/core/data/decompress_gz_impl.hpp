@@ -36,7 +36,7 @@ inline bool IsGzipFile(const std::string& filePath)
 
 #ifdef MLPACK_USE_ZLIB
 
-inline bool DecompressGzFile(const std::string& srcPath,
+inline void DecompressGzFile(const std::string& srcPath,
                              const std::string& destPath)
 {
   gzFile gzIn = gzopen(srcPath.c_str(), "rb");
@@ -80,7 +80,6 @@ inline bool DecompressGzFile(const std::string& srcPath,
   }
 
   gzclose(gzIn);
-  return true;
 }
 
 #endif // MLPACK_USE_ZLIB
