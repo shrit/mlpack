@@ -847,7 +847,7 @@ format (e.g. `data.csv.gz` is loaded as CSV, `data.arff.gz` as ARFF).
 
 ```c++
 // Load a local gzip-compressed CSV file directly.
-// Requires MLPACK_USE_ZLIB to be enabled (pass -DENABLE_ZLIB=ON to CMake).
+// Requires MLPACK_USE_ZLIB to be enabled.
 arma::mat data;
 mlpack::Load("my_dataset.csv.gz", data, mlpack::Fatal);
 
