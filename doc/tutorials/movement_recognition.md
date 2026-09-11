@@ -7,7 +7,7 @@ The main target of this tutorial is to provide an end-to-end example of using ml
 on real resource-constrained embedded hardware.  The tutorial can be followed
 step-by-step.
 
-If you have not cross-compiled mlpack before, read these first:
+If you have not cross-compiled mlpack before, see also these other resources on cross-compiling mlpack:
 
  * [Run mlpack bindings on a Raspberry Pi](../embedded/crosscompile_armv7.md)
  * [Cross-compile an mlpack example for embedded hardware](../embedded/crosscompile_example.md)
@@ -34,8 +34,8 @@ Contents:
 We are building a machine learning based human movement recognition pipeline to detect
 movements such as walking, sitting, squats, and climbing stairs. This
 is enabled by using a 9 Degree of Freedom inertial sensor that is read over an I2C bus.
-The collected data is cut into windows, and then fed into a Fast Fourier
-Transform (FFT) in order to extract the features from each collected windows.
+The collected data is cut into windows, and then fed into an FFT in order to
+extract the features from each collected windows.
 Finally, we build a small `float32` neural network that learns to recognize the
 movements with the highest possible accuracy.
 
@@ -144,11 +144,31 @@ cd examples/cpp/movement_recognition
 
 All four programs build from one CMake project.  `imu_test` and `collect`
 only need the Linux I2C headers, while `train` and `infer` link mlpack; CMake
-reuses the repository's embedded cross-compile infrastructure (`CMake/`) to fetch
+uses the existing embedded cross-compile infrastructure to fetch
 mlpack and its dependencies and cross-compile OpenBLAS, as described in the
-[embedded example tutorial](../embedded/crosscompile_example.md).  At this stage, we need to
-define the architecture of the target device with the `ARCH_NAME=RV64GCV`
-variable (the ISA of the board's C906 core):
+[embedded example tutorial](../embedded/crosscompile_example.md).
+
+Please note that in order to run mlpack on the Milk-V, we need first to disable
+OpenMP since the board had one core. Second, we need to modify the underlying
+OpenBlas library. The latter is necessary because the Milk-V has 28MB of usable 
+RAM.  Without this modification, the `train` program will not run; this is because the matrix
+multiplication functionality in OpenBLAS allocates an internal buffer of size 
+32MB---larger than the available RAM.  Therefore, we have to reduce this, along
+with the block sizes used during matrix multiplication.
+
+Both of these changes are a part of the example repository, in the file 
+[CMake/patches/openblas-riscv64-low-memory.patch]().
+
+The example applies this patch automatically when it calls `mlpack.cmake` to 
+download mlpack's dependencies and cross-compile OpenBLAS.
+
+We are also disabling STB, dr_libs and also httplibs. These dependencies
+support loading images, audio files, and downloading from a server. However,
+they are adding a dead footprint that can be avoided for low resource devices.
+For more information please check [compile-time options](../user/compile.md#configuring-mlpack-with-compile-time-definitions)
+
+At this stage, we need to define the architecture of the target device with
+the `ARCH_NAME=RV64GCV` variable (the ISA of the board's C906 core):
 
 ```sh
 mkdir build && cd build
@@ -158,17 +178,16 @@ cmake \
     -DCMAKE_TOOLCHAIN_FILE=../CMake/crosscompile-toolchain.cmake \
     -DTOOLCHAIN_PREFIX=$TC/bin/riscv64-buildroot-linux-musl- \
     -DCMAKE_SYSROOT=$TC/riscv64-buildroot-linux-musl/sysroot \
+    -DOPENBLAS_PATCHES=CMake/patches/openblas-riscv64-low-memory.patch \
+    -DMLPACK_DISABLE_STB=ON \
+    -DMLPACK_DISABLE_DR_LIBS=ON \
+    -DMLPACK_DISABLE_HTTPLIB=ON \
     ..
 make            # builds imu_test, collect, train, and infer
 ```
 
 `ARCH_NAME=RV64GCV` selects C906 tuning (`-mtune=thead-c906`) and a scalar
-`RISCV64_GENERIC` OpenBLAS build (no large vector buffers, friendlier on
-64 MB), and OpenMP is disabled (the board is effectively single-core for this
-workload), check [Annex B](#annex-b-making-openblas-fit-so-training-runs-on-the-device),
-for more details regarding OpenBLAS optimization for this specific device.  When
-cross-compiling, every binary is linked statically, so nothing needs to be
-installed on the device.  You can also build a single program, e.g. `make collect`.
+`RISCV64_GENERIC`
 
 When the build finishes you will have `imu_test`, `collect`, `train`, and
 `infer` in the build directory, all static RISC-V binaries:
@@ -178,7 +197,7 @@ file train
 # train: ELF 64-bit LSB executable, UCB RISC-V, ... statically linked, stripped
 ```
 
-### Copying everything to the device
+### Copying binaries to the device
 
 The Duo's BusyBox userland has no SFTP server, so a plain `scp` fails with
 `sh: /usr/libexec/sftp-server: not found`.  Use scp's legacy protocol with
@@ -188,7 +207,7 @@ for the Duo is `milkv`:
 
 ```sh
 scp -O imu_test collect train infer  root@192.168.42.1:/root/
-ssh root@192.168.42.1 'chmod +x /root/imu_test /root/collect /root/train /root/infer'
+ssh root@192.168.42.1 /root/imu_test /root/collect /root/train /root/infer
 ```
 
 ### Running it on the device
@@ -209,14 +228,6 @@ Therefore, you can mux the pins and change their functionality as follows:
 duo-pinmux -p GP0 -f IIC0_SCL
 duo-pinmux -p GP1 -f IIC0_SDA
 i2cdetect -y -r 0          # Now it should show devices at 0x1d and 0x6b (and 0x77)
-```
-
-2. Check the sensor and calibrate the magnetometer
-Even though we are going to use Accelerometer only. Calibration is important and it is 
-built into `imu_test`; rotate the board through all orientations while it samples:
-
-```sh
-./imu_test --calibrate mag.cal /dev/i2c-0 20
 ```
 
 3. Collect labelled data.  Each recording is written to its own file named
@@ -267,56 +278,8 @@ are positional -- `infer <sensors> <device> <mag-cal> <model-prefix>
 You can pass more than one model prefix to compare several trained networks on
 the same live stream.
 
-### Annex A: shrinking the binary (image and audio support)
 
-When you `#include <mlpack.hpp>`, mlpack's `data::Load`/`data::Save` pull in
-support for image files (via the bundled STB libraries) and audio files (via the
-bundled dr_libs).  This tutorial only loads CSVs, so that image and audio code is
-dead weight. Therefore, disabling it trims roughly 100 KB from the static binary.
-
-mlpack exposes these as [compile-time options](../user/compile.md#configuring-mlpack-with-compile-time-definitions),
-and the CMake infrastructure this example uses turns them into flags you can pass
-on the command line.  Add them to the configure step from
-[Building the programs](#building-the-programs):
-
-```sh
-cmake ... -DMLPACK_DISABLE_STB=ON -DMLPACK_DISABLE_DR_LIBS=ON -DMLPACK_DISABLE_HTTPLIB=ON ..
-```
-
-### Annex B: making OpenBLAS fit (so training runs on the device)
-
-This is the single most important thing to understand for training on a
-64 MB board, so it is worth reading carefully even though the example already
-does it for you.
-
-In the following we are detailing necessary modification relevant to OpenBLAS
-to make it able to run neural network on resource constrained device. The
-current default configuration, the neural network training step would freeze when 
-we try to run it on the target device. The reason for this is the matrix
-multiplication function `GEMM`. By default GEMM allocates an internal buffer
-with default `BUFFER_SIZE=32` MB allocated, which we are going to reduce to 8 MB.
-
-In addition to this, we need to reduce the number of columns block treated by
-the CPU at one time, since the cache is lower on our device. We need to reduce
-this from `SGEMM_DEFAULT_R = 12288` to `2048`.
-
-The above reduction is possible for two reason: the first one is that this 
-board has only 28 MB available, and second reason is that all also our matrices
-are tiny in this example (e.g., 64 x 297). 
-
-Both reductions are shipped as a patch file that lowers these two values in the
-OpenBLAS source before it is built.  It is applied automatically for the riscv64
-target, so you normally do nothing; to apply it explicitly (or supply your own),
-pass it to CMake with `-DOPENBLAS_PATCHES=CMake/patches/openblas-riscv64-low-memory.patch`.
-
-In addition to this, OpenBLAS is build as a single thread, since the cpu is a
-single-core:
 
 `USE_THREAD=0 NUM_THREADS=1 USE_OPENMP=0`:
 
-```cmake
-execute_process(COMMAND make TARGET=${OPENBLAS_TARGET} BINARY=${OPENBLAS_BINARY}
-    HOSTCC=gcc CC=${CMAKE_C_COMPILER} FC=${CMAKE_FORTRAN_COMPILER}
-    NO_SHARED=1 USE_THREAD=0 NUM_THREADS=1 USE_OPENMP=0
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/deps/OpenBLAS-${version})
-```
+
