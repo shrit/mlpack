@@ -2,7 +2,7 @@
  * @file core/data/decompress_gz.hpp
  * @author Omar Shrit
  *
- * Standalone gzip decompression using zlib.
+ * gzip decompression using zlib.
  *
  * mlpack is free software; you may redistribute it and/or modify it under the
  * terms of the 3-clause BSD license.  You should have received a copy of the
