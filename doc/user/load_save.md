@@ -35,6 +35,8 @@ and [format detection/selection](#formats).
      - an exception is *not* thrown on an error.
    * Returns a `bool` indicating whether the load was a success.
    * `X` can be [any supported load type](#types).
+   * gzip-compressed local or remote files (`.csv.gz`, `.arff.gz`, etc.) can also be
+     decompressed.
 
  - `Load(path, X, Option1 + Option2 + ...)`
    * Load `X` from the given local file or remote URL `path` with the given options.
@@ -95,6 +97,19 @@ bool success = mlpack::Load("http://datasets.mlpack.org/iris.csv",
     data, mlpack::NoFatal);
 if (!success)
   std::cout << "Error loading dataset" << std::endl;
+```
+
+Loading a compressed gzip file:
+
+```c++
+  arma::mat data;
+  mlpack::Load("https://datasets.mlpack.org/avocado.csv.gz", data);
+
+  std::cout << "Loaded " << data.n_rows << " x " << data.n_cols
+      << " from a gzip-compressed file." << std::endl;
+
+  // In case the file is available locally:
+  mlpack::Load("mydata.csv.gz", data);
 ```
 
 See also the other examples for each [supported load type](#types):
@@ -538,7 +553,8 @@ given in the table.
 |---------------------------|-------------------------------------------------|---------------------------|---------------------------|-------------------|
 | `AutoDetect` _(default)_  | `opts.Format() = mlpack::FileType::AutoDetect`  | _(n/a)_                   | All [data types](#types). | The format of the file is autodetected as one of the formats below. |
 |---------------------------|-------------------------------------------------|---------------------------|---------------------------|-------------------|
-| `CSV`                     | `opts.Format() = mlpack::FileType::CSVASCII;`   | `.csv`                    | [Numeric](#numeric-data) and [categorical](#mixed-categorical-data) data | CSV format.  If loading a sparse matrix and the CSV has three columns, the data is interpreted as a [coordinate list](https://arma.sourceforge.net/docs.html#save_load_mat). |
+|`gzip`                     | `N/A (Required to link with -lz)`               | `.gz`                     | All [data types](#types). | gzipped format, decompress the file into any intermediate supported format such as CSV, TSV, etc.|
+|`CSV`                      | `opts.Format() = mlpack::FileType::CSVASCII;`   | `.csv`                    | [Numeric](#numeric-data) and [categorical](#mixed-categorical-data) data | CSV format.  If loading a sparse matrix and the CSV has three columns, the data is interpreted as a [coordinate list](https://arma.sourceforge.net/docs.html#save_load_mat). |
 | `TSV`                     | `opts.Format() = mlpack::FileType::TSVASCII;`   | `.tsv`                    | [Numeric](#numeric-data) and [categorical](#mixed-categorical-data) data. | TSV format.  If loading a sparse matrix and the TSV has three columns, the data is interpreted as a [coordinate list](https://arma.sourceforge.net/docs.html#save_load_mat). |
 | `ArmaASCII`               | `opts.Format() = mlpack::FileType::ArmaASCII;`  | `.txt`, `.csv`            | [Numeric](#numeric-data) data | Space-separated values as saved by Armadillo with the [`arma_ascii`](https://arma.sourceforge.net/docs.html#save_load_mat) format. |
 | `RawASCII`                | `opts.Format() = mlpack::FileType::RawASCII;`   | `.txt`                    | [Numeric](#numeric-data) data | Space-separated values with no header.  If loading a sparse matrix and the file has three columns, the data is interpreted as a [coordinate list](https://arma.sourceforge.net/docs.html#save_load_mat). |
