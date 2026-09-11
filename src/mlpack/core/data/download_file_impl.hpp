@@ -257,7 +257,7 @@ inline std::string DecompressDownloadedIfNeeded(const std::string& filePath,
   if (!IsGzipFile(filePath))
     return filePath;
 
-  DecompressDownloadedFile(filePath, destPath);
+  DecompressGzFile(filePath, destPath);
   return destPath;
 #else
   throw std::runtime_error("The file '" + filePath + "' is gzip-compressed "
@@ -422,63 +422,6 @@ inline bool DownloadFileWithCache(const std::string& url,
 
   return true;
 }
-
-#ifdef MLPACK_USE_ZLIB
-
-inline bool DecompressDownloadedFile(const std::string& srcPath,
-                               const std::string& destPath)
-{
-  std::ifstream in(srcPath, std::ios::binary);
-  if (!in)
-  {
-    throw std::runtime_error("DecompressDownloadedFile(): cannot open '" + srcPath
-        + "' for reading.");
-  }
-
-  std::string compressed(
-      (std::istreambuf_iterator<char>(in)),
-      std::istreambuf_iterator<char>());
-  in.close();
-
-  httplib::detail::gzip_decompressor decompressor;
-  if (!decompressor.is_valid())
-  {
-    throw std::runtime_error("DecompressDownloadedFile(): failed to initialize "
-        "gzip decompressor.");
-  }
-
-  std::string decompressed;
-  bool ok = decompressor.decompress(compressed.data(), compressed.size(),
-      [&](const char* data, size_t len)
-      {
-        decompressed.append(data, len);
-        return true;
-      });
-
-  if (!ok)
-  {
-    throw std::runtime_error("DecompressDownloadedFile(): decompression of '"
-        + srcPath + "' failed.");
-  }
-
-  std::ofstream out(destPath, std::ios::binary);
-  if (!out)
-  {
-    throw std::runtime_error("DecompressDownloadedFile(): cannot open '" + destPath
-        + "' for writing.");
-  }
-
-  out.write(decompressed.data(), decompressed.size());
-  if (!out.good())
-  {
-    throw std::runtime_error("DecompressDownloadedFile(): error writing to '"
-        + destPath + "'.");
-  }
-
-  return true;
-}
-
-#endif // MLPACK_USE_ZLIB
 
 #else
 

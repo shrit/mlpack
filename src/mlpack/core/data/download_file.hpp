@@ -120,21 +120,6 @@ inline bool DownloadFile(const std::string& url,
 inline bool DownloadFileWithCache(const std::string& url,
                                  std::string& filename);
 
-#ifdef MLPACK_USE_ZLIB
-
-/*
- * Decompress a gzip file and write the result to a new file.
- * Uses httplib's gzip_decompressor internally.
- *
- * @param srcPath Path to the gzip-compressed file.
- * @param destPath Path where the decompressed file will be written.
- * @return true on success, throws on failure.
- */
-inline bool DecompressDownloadedFile(const std::string& srcPath,
-                               const std::string& destPath);
-
-#endif // MLPACK_USE_ZLIB
-
 /**
  * If the file at `filePath` has a .gz extension and contains gzip data,
  * decompress it to `destPath` and return `destPath`.  If the decompressed file
