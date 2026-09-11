@@ -4737,9 +4737,9 @@ TEST_CASE("IsGzipFileTest", "[LoadSaveTest]")
 }
 
 /**
- * Test DecompressGzFile() directly.
+ * Test DecompressGzFile() on a downloaded .gz file.
  */
-TEST_CASE("DecompressGzFileTest", "[LoadSaveTest]")
+TEST_CASE("DecompressGzFileDownloadTest", "[LoadSaveTest]")
 {
   std::string gzFile = "test_decompress.csv.gz";
   std::string csvFile = "test_decompress.csv";
@@ -4794,11 +4794,26 @@ TEST_CASE("LoadGzipCSVFromURL", "[LoadSaveTest]")
 }
 
 /**
- * Download a gzip'ed file and an uncompressed version of the same file, load
- * both, and verify that the resulting matrices are identical.
+ * Download a .gz file, decompress it manually, load the result, then load the
+ * same .gz URL through Load() (full auto-decompress pipeline), and verify that
+ * both produce identical matrices.
  */
 TEST_CASE("GzipVsUncompressedDownloadTest", "[LoadSaveTest]")
 {
+  std::string gzFile = "test_gz_vs_csv.csv.gz";
+  std::string csvFile = "test_gz_vs_csv.csv";
+  remove(gzFile.c_str());
+  remove(csvFile.c_str());
+
+  REQUIRE(DownloadFile("https://datasets.mlpack.org/avocado.csv.gz",
+      gzFile) == true);
+  REQUIRE_NOTHROW(DecompressGzFile(gzFile, csvFile));
+
+  arma::mat dataFromManual;
+  REQUIRE(Load(csvFile, dataFromManual) == true);
+  REQUIRE(dataFromManual.n_rows > 0);
+  REQUIRE(dataFromManual.n_cols > 0);
+
   std::string cacheDir = GetCacheDir();
   std::string manifestPath =
       (std::filesystem::path(cacheDir) / "cache_manifest.csv").string();
@@ -4810,27 +4825,17 @@ TEST_CASE("GzipVsUncompressedDownloadTest", "[LoadSaveTest]")
   remove(cachedGz.c_str());
   remove(manifestPath.c_str());
 
-  arma::mat dataFromGz;
-  REQUIRE(Load("https://datasets.mlpack.org/avocado.csv.gz", dataFromGz,
+  arma::mat dataFromPipeline;
+  REQUIRE(Load("https://datasets.mlpack.org/avocado.csv.gz", dataFromPipeline,
       Fatal) == true);
-  REQUIRE(dataFromGz.n_rows > 0);
-  REQUIRE(dataFromGz.n_cols > 0);
 
-  // Clean the cache so the uncompressed download is independent.
-  remove(cachedCsv.c_str());
-  remove(cachedGz.c_str());
-  remove(manifestPath.c_str());
+  REQUIRE(dataFromManual.n_rows == dataFromPipeline.n_rows);
+  REQUIRE(dataFromManual.n_cols == dataFromPipeline.n_cols);
+  REQUIRE(arma::approx_equal(dataFromManual, dataFromPipeline,
+      "absdiff", 1e-10));
 
-  arma::mat dataFromCsv;
-  REQUIRE(Load("https://datasets.mlpack.org/avocado.csv", dataFromCsv,
-      Fatal) == true);
-  REQUIRE(dataFromCsv.n_rows > 0);
-  REQUIRE(dataFromCsv.n_cols > 0);
-
-  REQUIRE(dataFromGz.n_rows == dataFromCsv.n_rows);
-  REQUIRE(dataFromGz.n_cols == dataFromCsv.n_cols);
-  REQUIRE(arma::approx_equal(dataFromGz, dataFromCsv, "absdiff", 1e-10));
-
+  remove(gzFile.c_str());
+  remove(csvFile.c_str());
   remove(cachedCsv.c_str());
   remove(cachedGz.c_str());
   remove(manifestPath.c_str());
