@@ -110,7 +110,7 @@ inline void DecompressGzipIfNeeded(std::string& filename)
   throw std::runtime_error("Load(): the file '" + filename + "' is "
       "gzip-compressed but MLPACK_USE_ZLIB is not enabled.  Enable zlib "
       "support by adding '#define MLPACK_USE_ZLIB' before including mlpack "
-      "and linking with -lz, or pass -DENABLE_ZLIB=ON to CMake.");
+      "and linking with -lz.");
 #endif
 }
 
