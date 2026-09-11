@@ -828,8 +828,7 @@ is enabled, `DownloadFile()` automatically decompresses `.gz` files after
 downloading.
 
 ```c++
-// To use gzip decompression, enable MLPACK_USE_ZLIB and link with -lz,
-// or pass -DENABLE_ZLIB=ON to CMake.
+// To use gzip decompression, enable MLPACK_USE_ZLIB and link with -lz.
 mlpack::DownloadFile("https://datasets.mlpack.org/avocado.csv.gz",
     "avocado.csv.gz");
 
