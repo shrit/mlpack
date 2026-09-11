@@ -262,7 +262,8 @@ inline std::string DecompressDownloadedIfNeeded(const std::string& filePath,
 #else
   throw std::runtime_error("The file '" + filePath + "' is gzip-compressed "
       "but MLPACK_USE_ZLIB is not enabled.  Enable zlib support by adding "
-      "'#define MLPACK_USE_ZLIB' before including mlpack and linking with -lz.");
+      "'#define MLPACK_USE_ZLIB' before including mlpack and linking with "
+      "-lz.");
 #endif
 }
 
