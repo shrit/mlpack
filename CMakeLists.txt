@@ -25,7 +25,7 @@ option(ENABLE_HTTPLIB "Enable httplib support with mlpack." OFF)
 option(DISABLE_HTTPLIB "Disable httplib support with mlpack." OFF)
 option(DISABLE_REMOTE_DATASET_CACHE "Disable caching of downloaded datasets." OFF)
 set(REMOTE_DATASET_CACHE_DIR "" CACHE STRING "Override the directory where cached datasets are stored.")
-option(ENABLE_ZLIB "Enable zlib (gzip) support with mlpack." OFF)
+option(ENABLE_ZLIB "Enable zlib (gzip) support for dataset loading." OFF)
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
