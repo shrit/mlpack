@@ -242,8 +242,8 @@ jobs:
         shell: powershell
         run: |
           nuget install OpenBLAS -o deps
-          nuget install zlib -o deps -Version 1.3.1
           nuget install ensmallen -o deps -Version 2.17.0
+          vcpkg install zlib:x64-windows
           # Delete all ensmallen dependencies including armadillo headers, we do not need them here.
           Remove-Item deps\ensmallen.2.17.0\installed\x64-linux\share -Force -Recurse
           Remove-Item deps\ensmallen.2.17.0\installed\x64-linux\include\armadillo_bits -Force -Recurse
@@ -295,8 +295,8 @@ jobs:
               -DCEREAL_INCLUDE_DIR=../deps/cereal-1.3.2/include/ \
               -DCMAKE_VERBOSE_MAKEFILE=ON \
               -DENABLE_HTTPLIB=ON -DENABLE_ZLIB=ON \
-              -DZLIB_LIBRARY='${{ github.workspace }}'/deps/zlib.1.3.1/lib/native/lib/x64/Release/zlib.lib \
-              -DZLIB_INCLUDE_DIR='${{ github.workspace }}'/deps/zlib.1.3.1/lib/native/include/ \
+              -DZLIB_LIBRARY='${{ env.VCPKG_INSTALLATION_ROOT }}'/installed/x64-windows/lib/zlib.lib \
+              -DZLIB_INCLUDE_DIR='${{ env.VCPKG_INSTALLATION_ROOT }}'/installed/x64-windows/include/ \
               ../
 
       - name: Build mlpack
