@@ -146,7 +146,7 @@ inline bool DecompressDownloadedFile(const std::string& srcPath,
  * @return The path to the usable (decompressed or original) file.
  */
 inline std::string DecompressDownloadedIfNeeded(const std::string& filePath,
-                                      const std::string& destPath);
+                                                const std::string& destPath);
 
 #endif
 
