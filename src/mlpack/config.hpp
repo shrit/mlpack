@@ -148,7 +148,7 @@
   #undef MLPACK_USE_SYSTEM_HTTPLIB
 #endif
 
-// MLPACK_USE_ZLIB enables gzip decompression for downloaded datasets.
+// MLPACK_USE_ZLIB enables decompression for gzip-compressed datasets.
 #if !defined(MLPACK_USE_ZLIB)
   // #define MLPACK_USE_ZLIB
 #endif
