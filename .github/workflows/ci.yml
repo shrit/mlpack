@@ -250,6 +250,8 @@ jobs:
             Write-Error "z.lib not found after vcpkg install!"
             exit 1
           }
+          # Export VCPKG_INSTALLATION_ROOT so later bash steps can see it.
+          Add-Content -Path $env:GITHUB_ENV -Value "VCPKG_INSTALLATION_ROOT=$env:VCPKG_INSTALLATION_ROOT"
           # Delete all ensmallen dependencies including armadillo headers, we do not need them here.
           Remove-Item deps\ensmallen.2.17.0\installed\x64-linux\share -Force -Recurse
           Remove-Item deps\ensmallen.2.17.0\installed\x64-linux\include\armadillo_bits -Force -Recurse
