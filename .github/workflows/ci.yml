@@ -246,8 +246,8 @@ jobs:
           vcpkg install zlib:x64-windows
           # Verify zlib was installed and show where it landed.
           ls "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\lib\"
-          if (-not (Test-Path "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\lib\zlib.lib")) {
-            Write-Error "zlib.lib not found after vcpkg install!"
+          if (-not (Test-Path "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\lib\z.lib")) {
+            Write-Error "z.lib not found after vcpkg install!"
             exit 1
           }
           # Delete all ensmallen dependencies including armadillo headers, we do not need them here.
@@ -301,7 +301,7 @@ jobs:
               -DCEREAL_INCLUDE_DIR=../deps/cereal-1.3.2/include/ \
               -DCMAKE_VERBOSE_MAKEFILE=ON \
               -DENABLE_HTTPLIB=ON -DENABLE_ZLIB=ON \
-              -DZLIB_LIBRARY="${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib/zlib.lib" \
+              -DZLIB_LIBRARY="${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib/z.lib" \
               -DZLIB_INCLUDE_DIR="${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/include/" \
               ../
 
