@@ -99,17 +99,20 @@ if (!success)
   std::cout << "Error loading dataset" << std::endl;
 ```
 
-Loading a compressed gzip file:
+Loading a compressed gzip file (requires
+[`MLPACK_USE_ZLIB`](compile.md#configuring-mlpack-with-compile-time-definitions)):
 
 ```c++
-  arma::mat data;
-  mlpack::Load("https://datasets.mlpack.org/avocado.csv.gz", data);
+// See https://datasets.mlpack.org/avocado.csv.gz.
+arma::mat data;
+#ifdef MLPACK_USE_ZLIB
+mlpack::Load("avocado.csv.gz", data);
 
-  std::cout << "Loaded " << data.n_rows << " x " << data.n_cols
-      << " from a gzip-compressed file." << std::endl;
-
-  // In case the file is available locally:
-  mlpack::Load("mydata.csv.gz", data);
+std::cout << "Loaded avocado.csv.gz: " << data.n_rows << " x " << data.n_cols
+    << "." << std::endl;
+#else
+std::cout << "zlib not enabled; skipping gzip example." << std::endl;
+#endif
 ```
 
 See also the other examples for each [supported load type](#types):
