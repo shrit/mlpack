@@ -114,7 +114,7 @@ RAM, we cross-compile on a host `x86_64` machine and copy the static
 binaries on the target machine, exactly as we did in the [Raspberry Pi tutorial](../embedded/crosscompile_armv7.md).
 The board uses a RISC-V C906 core, so we need a `riscv64-lp64d`
 [Bootlin](https://toolchains.bootlin.com/) toolchain.  Our target in this tutorial to produce
-a small static binary, therefore, we use the musl variant
+a small static binary; therefore, we use the musl variant:
 
 ```sh
 wget https://toolchains.bootlin.com/downloads/releases/toolchains/riscv64-lp64d/tarballs/riscv64-lp64d--musl--stable-2025.08-1.tar.xz
@@ -141,12 +141,6 @@ cd examples/cpp/movement_recognition
 ```
 
 ### Building the programs
-
-All four programs build from one CMake project.  `imu_test` and `collect`
-only need the Linux I2C headers, while `train` and `infer` link mlpack; CMake
-uses the existing embedded cross-compile infrastructure to fetch
-mlpack and its dependencies and cross-compile OpenBLAS, as described in the
-[embedded example tutorial](../embedded/crosscompile_example.md).
 
 Please note that in order to run mlpack on the Milk-V, we need first to disable
 OpenMP since the board had one core. Second, we need to modify the underlying
@@ -199,12 +193,11 @@ file train
 
 ### Copying binaries to the device
 
-The Duo's BusyBox userland has no SFTP server, so a plain `scp` fails with
-`sh: /usr/libexec/sftp-server: not found`.  Use scp's legacy protocol with
-`-O`.  Over the Duo's USB-OTG connection the board is usually reachable at
-`192.168.42.1`, you can check that by doing a local ping. The default password
+We can use `scp` to copy the programs to the Milk-V, but, we have to use the 
+`-O` option for the legacy SCP protocol since the Milk-V does not support SFTP.
+If you have plugged in your Milk-V via USB, the board should be reachable at 
+`192.168.42.1`; you can check that by doing a local ping.  The default password
 for the Duo is `milkv`:
-
 ```sh
 scp -O imu_test collect train infer  root@192.168.42.1:/root/
 ssh root@192.168.42.1 /root/imu_test /root/collect /root/train /root/infer
@@ -234,7 +227,7 @@ i2cdetect -y -r 0          # Now it should show devices at 0x1d and 0x6b (and 0x
 `<label>_<date>.csv`, so the label is the file name.  The arguments are
 positional -- `collect <label> [sensors] [out-dir] [device] [rate-hz]
 [duration-sec] [mag-cal]` -- so here we record accelerometer only, into `data`,
-on the default bus, at 100 Hz, for 30 seconds.  Run `collect` once per movement:
+on the default I2C bus, at 100 Hz, for 30 seconds.  Run `collect` once per movement:
 
 ```sh
 mkdir data
